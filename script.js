@@ -1,138 +1,121 @@
-// Initialize Icons
 lucide.createIcons();
 
-// Data Storage Logic
-let assets = JSON.parse(localStorage.getItem('erp_assets')) || [
-    { id: '1', name: 'קרן השתלמות', balance: 125000, company: 'אלטשולר שחם', type: 'Pension' },
-    { id: '2', name: 'קופת גמל להשקעה', balance: 42000, company: 'הראל', type: 'Savings' },
-    { id: '3', name: 'חשבון עובר ושב', balance: 18500, company: 'בנק לאומי', type: 'Cash' },
-    { id: '4', name: 'קרן פנסיה', balance: 280000, company: 'מנורה', type: 'Pension' }
+// ניהול נתונים דינמי
+let assets = [
+    { id: 1, name: 'פנסיה - מיטב דש', company: 'מיטב', balance: 85000, fee: '1.5%', liquid: '1.1.2063' },
+    { id: 2, name: 'קרן השתלמות', company: 'הראל', balance: 62000, fee: '0.7%', liquid: '1.6.2027' }
 ];
 
-const policies = [
-    { name: 'ביטוח בריאות פרטי', company: 'הראל', premium: 250, status: 'פעיל' },
-    { name: 'ביטוח חיים (ריסק)', company: 'מגדל', premium: 85, status: 'פעיל' },
-    { name: 'ביטוח רכב (מקיף)', company: 'הפניקס', premium: 420, status: 'פעיל' },
-    { name: 'זכאות סל הריון', company: 'כללית פלטינום', premium: 0, status: 'זכאי' }
+let insurances = [
+    { id: 1, type: 'בריאות', provider: 'כללית פלטינום', cost: 180, marketAvg: 160, status: 'יקר מהשוק' },
+    { id: 2, type: 'חיים', provider: 'מגדל', cost: 120, marketAvg: 95, status: 'פעיל' }
 ];
 
-let mainChart;
+let pieChart;
 
-function init() {
+function updateAll() {
     renderAssets();
-    renderPolicies();
+    renderInsurances();
     updateKPIs();
-    renderChart();
+    updateCompound();
+    renderPie();
 }
 
 function updateKPIs() {
-    const totalBalance = assets.reduce((s, a) => s + a.balance, 0);
-    const totalPremium = policies.reduce((s, p) => s + p.premium, 0);
-    
-    document.getElementById('kpi-assets').innerText = `₪${totalBalance.toLocaleString()}`;
-    document.getElementById('kpi-insurance').innerText = `₪${totalPremium.toLocaleString()}`;
-    document.getElementById('kpi-count').innerText = assets.length;
+    const totalA = assets.reduce((s, a) => s + Number(a.balance), 0);
+    const totalI = insurances.reduce((s, i) => s + Number(i.cost), 0);
+    document.getElementById('sum-assets').innerText = `₪${totalA.toLocaleString()}`;
+    document.getElementById('sum-insurance').innerText = `₪${totalI.toLocaleString()}`;
 }
 
 function renderAssets() {
-    const container = document.getElementById('asset-ledger');
-    container.innerHTML = assets.map((asset, index) => `
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-white/50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shadow-sm">
-                    <i data-lucide="${getIcon(asset.type)}"></i>
-                </div>
-                <div>
-                    <p class="font-bold text-slate-800 text-base">${asset.name}</p>
-                    <p class="text-xs text-slate-400">${asset.company}</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                <div class="text-left font-mono font-bold text-slate-900 text-lg">₪${asset.balance.toLocaleString()}</div>
-                <button onclick="deleteAsset(${index})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
+    const body = document.getElementById('asset-body');
+    body.innerHTML = assets.map((a, index) => `
+        <tr class="hover:bg-white/5 transition">
+            <td class="py-4 px-2"><input type="text" value="${a.name}" onchange="editItem('asset', ${index}, 'name', this.value)"></td>
+            <td class="py-4 px-2 text-slate-400">${a.company}</td>
+            <td class="py-4 px-2 font-mono font-bold text-cyan-400">₪<input type="number" class="w-24" value="${a.balance}" onchange="editItem('asset', ${index}, 'balance', this.value)"></td>
+            <td class="py-4 px-2 text-emerald-400 font-bold">${a.fee}</td>
+            <td class="py-4 px-2 text-slate-500 text-xs">${a.liquid}</td>
+            <td class="py-4 px-2 text-center text-red-500 cursor-pointer" onclick="deleteItem('asset', ${index})"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></td>
+        </tr>
     `).join('');
     lucide.createIcons();
 }
 
-function getIcon(type) {
-    switch(type) {
-        case 'Pension': return 'landmark';
-        case 'Savings': return 'pie-chart';
-        case 'Cash': return 'wallet';
-        default: return 'coins';
-    }
-}
-
-function renderPolicies() {
-    const table = document.getElementById('policy-table');
-    table.innerHTML = policies.map(p => `
-        <tr class="hover:bg-slate-50/50 transition-colors">
-            <td class="px-4 py-4 font-bold text-slate-700">${p.name}</td>
-            <td class="px-4 py-4 text-slate-500">${p.company}</td>
-            <td class="px-4 py-4 font-mono font-bold text-slate-800">₪${p.premium}</td>
-            <td class="px-4 py-4">
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold ${p.status === 'פעיל' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}">
-                    ${p.status}
-                </span>
-            </td>
+function renderInsurances() {
+    const body = document.getElementById('insurance-body');
+    body.innerHTML = insurances.map((i, index) => `
+        <tr class="hover:bg-white/5 transition">
+            <td class="py-4 px-2 font-bold">${i.type}</td>
+            <td class="py-4 px-2 text-slate-400">${i.provider}</td>
+            <td class="py-4 px-2 font-mono font-bold text-orange-400 text-lg">₪<input type="number" class="w-16" value="${i.cost}" onchange="editItem('insurance', ${index}, 'cost', this.value)"></td>
+            <td class="py-4 px-2 text-slate-500 font-mono italic">₪${i.marketAvg}</td>
+            <td class="py-4 px-2 text-center"><span class="${i.cost > i.marketAvg ? 'badge-warning' : 'badge-active'}">${i.status}</span></td>
+            <td class="py-4 px-2 text-center cursor-pointer" onclick="deleteItem('insurance', ${index})"><i data-lucide="trash-2" class="w-4 h-4 mx-auto text-red-500"></i></td>
         </tr>
     `).join('');
+    lucide.createIcons();
 }
 
-function renderChart() {
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    if (mainChart) mainChart.destroy();
-    
-    mainChart = new Chart(ctx, {
-        type: 'doughnut',
+function renderPie() {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    if (pieChart) pieChart.destroy();
+    pieChart = new Chart(ctx, {
+        type: 'pie',
         data: {
             labels: assets.map(a => a.name),
             datasets: [{
                 data: assets.map(a => a.balance),
-                backgroundColor: ['#2563eb', '#6366f1', '#818cf8', '#94a3b8', '#cbd5e1'],
-                hoverOffset: 20,
-                borderWidth: 0,
-                borderRadius: 4
+                backgroundColor: ['#06B6D4', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'],
+                borderWidth: 0
             }]
         },
         options: {
-            cutout: '78%',
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            animation: {
-                animateScale: true,
-                animateRotate: true
-            }
+            plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8' } } }
         }
     });
 }
 
-function addAsset() {
-    const name = prompt("שם הנכס:");
-    const balance = parseInt(prompt("סכום בצבירה:"));
-    const company = prompt("שם המוסד הפיננסי:");
+// לוגיקה לעריכה והוספה
+window.editItem = (type, index, key, value) => {
+    if (type === 'asset') assets[index][key] = value;
+    else insurances[index][key] = value;
+    updateAll();
+};
+
+window.addRow = (type) => {
+    if (type === 'asset') assets.push({ name: 'נכס חדש', company: 'ספק', balance: 0, fee: '0%', liquid: '-' });
+    else insurances.push({ type: 'ביטוח', provider: 'ספק', cost: 0, marketAvg: 100, status: 'פעיל' });
+    updateAll();
+};
+
+window.deleteItem = (type, index) => {
+    if (type === 'asset') assets.splice(index, 1);
+    else insurances.splice(index, 1);
+    updateAll();
+};
+
+// סימולטור ריבית דריבית
+function updateCompound() {
+    const monthly = Number(document.getElementById('input-monthly').value);
+    const yieldRate = Number(document.getElementById('input-yield').value) / 100;
     
-    if(name && balance) {
-        assets.push({ id: Date.now().toString(), name, balance, company: company || 'כללי', type: 'Savings' });
-        localStorage.setItem('erp_assets', JSON.stringify(assets));
-        init();
+    document.getElementById('val-monthly').innerText = `₪${monthly}`;
+    document.getElementById('val-yield').innerText = `${(yieldRate*100).toFixed(0)}%`;
+    
+    // חישוב מקורב ל-20 שנה
+    let total = assets.reduce((s, a) => s + Number(a.balance), 0);
+    for(let i=0; i<20*12; i++) {
+        total = (total + monthly) * (1 + yieldRate/12);
     }
+    document.getElementById('compound-result').innerText = `₪${Math.round(total).toLocaleString()}`;
 }
 
-function deleteAsset(index) {
-    if(confirm("האם למחוק נכס זה מהרשימה?")) {
-        assets.splice(index, 1);
-        localStorage.setItem('erp_assets', JSON.stringify(assets));
-        init();
-    }
-}
+document.getElementById('input-monthly').addEventListener('input', updateCompound);
+document.getElementById('input-yield').addEventListener('input', updateCompound);
 
-// Start
-init();
+// התחלה
+updateAll();
