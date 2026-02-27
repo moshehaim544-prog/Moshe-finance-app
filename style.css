@@ -1,11 +1,170 @@
-body { font-family: 'Assistant', sans-serif; letter-spacing: -0.01em; }
-.card { background: #111827; border: 1px solid #1F2937; border-radius: 32px; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.4); }
-.card-kpi { background: #111827; border: 1px solid #1F2937; padding: 24px; border-radius: 20px; }
-.label { color: #6B7280; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-.value { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
-.title { font-size: 18px; font-weight: 800; color: white; margin-bottom: 24px; }
-.btn-add { background: #06B6D4; color: #000; padding: 10px 22px; border-radius: 14px; font-weight: 900; font-size: 13px; transition: 0.3s; }
-.btn-top { background: #1F2937; color: #9CA3AF; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1px solid #374151; }
-.badge-pro { background: #064E3B; color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
-.badge-warn { background: #451A03; color: #F59E0B; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
-input { background: transparent; border: 1px solid #374151; border-radius: 8px; color: white; padding: 4px 8px; }
+/* פונטים וצבעי בסיס */
+:root {
+    --bg-dark: #0B0F19;
+    --card-bg: #111827;
+    --border-color: #1F2937;
+    --accent-cyan: #22d3ee;
+    --accent-emerald: #10b981;
+    --accent-orange: #f59e0b;
+    --text-slate: #94a3b8;
+}
+
+body {
+    font-family: 'Assistant', sans-serif;
+    background-color: var(--bg-dark);
+    color: #f8fafc;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* עיצוב כרטיסים (Cards) */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+.card-kpi {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* טיפוגרפיה */
+.label {
+    color: var(--text-slate);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.value {
+    font-size: 1.75rem;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+}
+
+.title {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+/* עיצוב שדות קלט (Inputs) - הסוד למראה ה-Pro */
+input[type="text"], 
+input[type="number"] {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: inherit;
+    padding: 4px 8px;
+    transition: all 0.2s;
+    outline: none;
+}
+
+input[type="text"]:hover, 
+input[type="number"]:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color);
+}
+
+input[type="text"]:focus, 
+input[type="number"]:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-cyan);
+}
+
+/* הסרת החיצים המעצבנים בשדות מספר */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* כפתורים */
+.btn-top {
+    background: #1F2937;
+    color: #9CA3AF;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+}
+
+.btn-top:hover {
+    background: #374151;
+    color: white;
+    border-color: #4b5563;
+}
+
+.btn-add {
+    background: var(--accent-cyan);
+    color: #000;
+    padding: 0.6rem 1.25rem;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+}
+
+/* טבלאות */
+table {
+    border-spacing: 0;
+    width: 100%;
+}
+
+th {
+    letter-spacing: 0.05em;
+}
+
+td {
+    vertical-align: middle;
+}
+
+/* סימולטור וסליידרים */
+.input-dark {
+    background: #0B0F19 !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 0.75rem !important;
+    font-weight: 700;
+}
+
+/* סטטוסים צבעוניים */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+/* התאמה לניידים */
+@media (max-width: 768px) {
+    .card-kpi {
+        padding: 1rem;
+    }
+    .value {
+        font-size: 1.25rem;
+    }
+}
