@@ -1,132 +1,45 @@
-:root {
-    --primary: #0f172a;
-    --accent: #3b82f6;
-    --bg: #f8fafc;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
-
 body {
     font-family: 'Assistant', sans-serif;
-    background-color: #e2e8f0;
+    -webkit-font-smoothing: antialiased;
 }
 
-.app-container {
-    max-width: 450px;
-    margin: 0 auto;
-    background: white;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+.glass-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.header-card {
-    background: var(--primary);
-    padding: 2.5rem 1.5rem;
-    color: white;
-    border-radius: 0 0 2.5rem 2.5rem;
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.85);
 }
 
-.tabs-nav {
-    display: flex;
-    background: white;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    border-bottom: 1px solid #f1f5f9;
+.gradient-text {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.tab-link {
-    flex: 1;
-    padding: 1.25rem 0;
-    text-align: center;
-    font-weight: 700;
-    color: #94a3b8;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: 0.3s;
-}
-
-.tab-link.active {
-    color: var(--primary);
-    border-bottom-color: var(--accent);
-}
-
-.tab-content {
-    display: none;
-    padding: 1.5rem;
-}
-
-.tab-content.active {
-    display: block;
-    animation: slideUp 0.4s ease-out;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
+/* אנימציית כניסה */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.item-card {
-    background: white;
-    border: 1px solid #f1f5f9;
-    padding: 1rem;
-    border-radius: 1.25rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+main > div {
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
-.btn-add {
-    color: var(--accent);
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+/* הסתרת סקרולבר בעיצוב נקי */
+::-webkit-scrollbar {
+    width: 6px;
 }
-
-.chart-container {
-    height: 180px;
-    margin: 1rem 0;
+::-webkit-scrollbar-track {
+    background: transparent;
 }
-
-input {
-    width: 100%;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    padding: 0.75rem;
-    font-family: inherit;
-    font-weight: 600;
+::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
 }
-
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    max-width: 450px;
-    background: white/90;
-    backdrop-blur: 10px;
-    border-top: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-around;
-    padding: 0.75rem 0;
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #94a3b8;
-    font-size: 10px;
-}
-
-.nav-item.active { color: var(--primary); }
-
-.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
