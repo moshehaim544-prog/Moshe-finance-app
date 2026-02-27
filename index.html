@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WealthGuard ERP | Pro</title>
+    <title>WealthGuard ERP | Professional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#0B0F19] text-slate-200">
+<body class="bg-[#0B0F19] text-slate-200 font-['Assistant']">
 
     <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <nav class="flex justify-between items-center bg-[#111827]/80 backdrop-blur-xl p-5 rounded-3xl border border-gray-800 sticky top-4 z-50">
@@ -18,95 +20,75 @@
                 <div class="bg-cyan-500/20 p-2 rounded-xl border border-cyan-500/30">
                     <i data-lucide="landmark" class="text-cyan-400 w-6 h-6"></i>
                 </div>
-                <h1 class="text-2xl font-black text-white tracking-tighter">WealthGuard <span class="text-cyan-400 text-xs font-bold uppercase tracking-widest mr-2">Enterprise</span></h1>
+                <h1 class="text-2xl font-black text-white tracking-tighter">WealthGuard <span class="text-cyan-400 text-[10px] uppercase tracking-[0.2em] mr-2">Control Center</span></h1>
             </div>
             <div class="flex gap-3">
-                <button class="btn-top">PDF</button>
-                <button class="btn-top">Excel</button>
+                <button onclick="exportToPDF()" class="btn-top">ייצוא PDF</button>
+                <button onclick="exportToExcel()" class="btn-top">ייצוא Excel</button>
             </div>
         </nav>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="card-kpi border-r-4 border-cyan-500"><p class="label">שווי נקי</p><p id="sum-assets" class="value text-white">₪0</p></div>
-            <div class="card-kpi border-r-4 border-orange-500"><p class="label">ביטוח חודשי</p><p id="sum-insurance" class="value text-white">₪0</p></div>
-            <div class="card-kpi border-r-4 border-emerald-500"><p class="label">חיסכון שנתי צפוי</p><p class="value text-white">₪88,380</p></div>
-            <div class="card-kpi border-r-4 border-purple-500"><p class="label">ציון בריאות</p><p class="value text-white">87/100</p></div>
+            <div class="card-kpi"><p class="label">שווי נקי</p><p id="sum-assets" class="value">₪0</p></div>
+            <div class="card-kpi"><p class="label">עלות ביטוח</p><p id="sum-insurance" class="value">₪0</p></div>
+            <div class="card-kpi"><p class="label">צפי צמיחה</p><p id="growth-kpi" class="value">₪0</p></div>
+            <div class="card-kpi"><p class="label">יחס חיסכון</p><p class="value">42%</p></div>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6">
             <div class="card p-8">
-                <h3 class="title">התפלגות הון</h3>
-                <div class="relative h-64">
-                    <canvas id="pieChart"></canvas>
-                </div>
+                <h3 class="title">התפלגות הון נוכחית</h3>
+                <canvas id="pieChart" class="max-h-64"></canvas>
             </div>
             <div class="lg:col-span-2 card p-8">
-                <h3 class="title">סימולטור צמיחה (ריבית דריבית)</h3>
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="text-xs text-slate-500 block mb-2 font-bold uppercase">הפקדה חודשית: <span id="val-monthly" class="text-cyan-400">₪2000</span></label>
-                            <input type="range" id="input-monthly" min="0" max="15000" step="100" value="2000" class="w-full accent-cyan-400">
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-500 block mb-2 font-bold uppercase">תשואה צפויה: <span id="val-yield" class="text-emerald-400">7%</span></label>
-                            <input type="range" id="input-yield" min="1" max="15" value="7" class="w-full accent-emerald-400">
-                        </div>
+                <h3 class="title">סימולטור צמיחה חופשי</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="space-y-4">
+                        <label class="text-xs text-slate-500 uppercase font-bold">הפקדה (₪)</label>
+                        <input type="number" id="input-monthly" value="2000" class="input-dark w-full">
+                        
+                        <label class="text-xs text-slate-500 uppercase font-bold text-emerald-400">תשואה (%)</label>
+                        <input type="number" id="input-yield" value="7" class="input-dark w-full">
+                        
+                        <label class="text-xs text-slate-500 uppercase font-bold text-cyan-400">שנים</label>
+                        <input type="number" id="input-years" value="20" class="input-dark w-full">
                     </div>
-                    <div class="bg-[#0B0F19] rounded-3xl p-8 border border-gray-800 text-center">
-                        <p class="text-xs text-slate-500 uppercase font-bold tracking-widest">שווי משוער (20 שנה)</p>
-                        <p id="compound-result" class="text-4xl font-black text-white mt-2">₪1,041,853</p>
+                    <div class="md:col-span-2 bg-[#0B0F19] rounded-3xl p-8 border border-gray-800 flex flex-col justify-center text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-widest">הון משוער לסוף תקופה</p>
+                        <p id="compound-result" class="text-5xl font-black text-white mt-2 tracking-tighter">₪0</p>
+                        <canvas id="growthChart" class="mt-4 h-32"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card p-8">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="title">ניהול נכסים מפורט</h3>
-                <button onclick="addRow('asset')" class="btn-add">+ נכס חדש</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right">
-                    <thead>
-                        <tr class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
-                            <th class="pb-4">נכס</th>
-                            <th class="pb-4">גוף מנהל</th>
-                            <th class="pb-4">יתרה (₪)</th>
-                            <th class="pb-4">דמי ניהול</th>
-                            <th class="pb-4">נזילות</th>
-                            <th class="pb-4 text-center">פעולות</th>
-                        </tr>
-                    </thead>
-                    <tbody id="asset-body" class="divide-y divide-gray-800/50"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card p-8">
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h3 class="title mb-1">תיק ביטוחים (אפיון כלי 2)</h3>
-                    <p class="text-xs text-slate-500 uppercase tracking-tighter italic">השוואה לממוצע שוק גיל 28</p>
+        <section class="grid gap-6">
+            <div class="card p-8 overflow-x-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="title m-0 italic">פורטפוליו נכסים</h3>
+                    <button onclick="addItem('asset')" class="btn-add">+ נכס חדש</button>
                 </div>
-                <button onclick="addRow('insurance')" class="btn-add">+ פוליסה חדשה</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right">
-                    <thead>
-                        <tr class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
-                            <th class="pb-4">סוג ביטוח</th>
-                            <th class="pb-4">ספק/חברה</th>
-                            <th class="pb-4 text-orange-400">עלות חודשית</th>
-                            <th class="pb-4">ממוצע שוק (28)</th>
-                            <th class="pb-4 text-center">סטטוס</th>
-                            <th class="pb-4 text-center">פעולות</th>
-                        </tr>
+                <table class="w-full text-right" id="table-assets">
+                    <thead class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
+                        <tr><th class="pb-4">נכס</th><th class="pb-4">גוף</th><th class="pb-4">יתרה</th><th class="pb-4">דמי ניהול</th><th class="pb-4 text-center">פעולות</th></tr>
                     </thead>
-                    <tbody id="insurance-body" class="divide-y divide-gray-800/50"></tbody>
+                    <tbody id="asset-body"></tbody>
                 </table>
             </div>
-        </div>
+
+            <div class="card p-8 overflow-x-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="title m-0 italic">ניהול תיק ביטוח</h3>
+                    <button onclick="addItem('insurance')" class="btn-add">+ פוליסה חדשה</button>
+                </div>
+                <table class="w-full text-right" id="table-insurance">
+                    <thead class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
+                        <tr><th class="pb-4">סוג</th><th class="pb-4">חברה</th><th class="pb-4">עלות</th><th class="pb-4">ממוצע שוק</th><th class="pb-4 text-center">סטטוס</th><th class="pb-4 text-center">פעולות</th></tr>
+                    </thead>
+                    <tbody id="insurance-body"></tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>
