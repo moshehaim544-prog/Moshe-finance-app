@@ -3,92 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WealthGuard ERP | Professional</title>
+    <title>WealthGuard ERP | Ultimate Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#0B0F19] text-slate-200 font-['Assistant']">
+<body class="bg-[#0B0F19] text-slate-200 font-['Assistant'] pb-20">
 
-    <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-        <nav class="flex justify-between items-center bg-[#111827]/80 backdrop-blur-xl p-5 rounded-3xl border border-gray-800 sticky top-4 z-50">
+    <div id="export-container" class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+        <nav class="flex justify-between items-center bg-[#111827]/80 backdrop-blur-xl p-5 rounded-3xl border border-gray-800">
             <div class="flex items-center gap-3">
-                <div class="bg-cyan-500/20 p-2 rounded-xl border border-cyan-500/30">
-                    <i data-lucide="landmark" class="text-cyan-400 w-6 h-6"></i>
+                <div class="bg-cyan-500/20 p-2 rounded-xl border border-cyan-500/30 text-cyan-400">
+                    <i data-lucide="shield-check"></i>
                 </div>
-                <h1 class="text-2xl font-black text-white tracking-tighter">WealthGuard <span class="text-cyan-400 text-[10px] uppercase tracking-[0.2em] mr-2">Control Center</span></h1>
+                <h1 class="text-2xl font-black text-white">WealthGuard <span class="text-cyan-400 text-xs">V3.0</span></h1>
             </div>
             <div class="flex gap-3">
-                <button onclick="exportToPDF()" class="btn-top">ייצוא PDF</button>
-                <button onclick="exportToExcel()" class="btn-top">ייצוא Excel</button>
+                <button onclick="exportToPDF()" class="btn-top bg-red-500/10 text-red-400 border-red-500/20">ייצוא PDF</button>
+                <button onclick="exportToExcel()" class="btn-top bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-white">Excel</button>
             </div>
         </nav>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="card-kpi"><p class="label">שווי נקי</p><p id="sum-assets" class="value">₪0</p></div>
-            <div class="card-kpi"><p class="label">עלות ביטוח</p><p id="sum-insurance" class="value">₪0</p></div>
-            <div class="card-kpi"><p class="label">צפי צמיחה</p><p id="growth-kpi" class="value">₪0</p></div>
-            <div class="card-kpi"><p class="label">יחס חיסכון</p><p class="value">42%</p></div>
+            <div class="card-kpi"><p class="label">שווי נקי נוכחי</p><p id="sum-assets" class="value text-white font-mono">₪0</p></div>
+            <div class="card-kpi"><p class="label">עלות ביטוחים</p><p id="sum-insurance" class="value text-orange-400 font-mono">₪0</p></div>
+            <div class="card-kpi"><p class="label">תזרים חודשי ממוצע</p><p id="avg-flow" class="value text-emerald-400 font-mono">₪0</p></div>
+            <div class="card-kpi"><p class="label">צפי הון עתידי</p><p id="growth-kpi" class="value text-cyan-400 font-mono">₪0</p></div>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6">
-            <div class="card p-8">
-                <h3 class="title">התפלגות הון נוכחית</h3>
-                <canvas id="pieChart" class="max-h-64"></canvas>
-            </div>
-            <div class="lg:col-span-2 card p-8">
-                <h3 class="title">סימולטור צמיחה חופשי</h3>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="space-y-4">
-                        <label class="text-xs text-slate-500 uppercase font-bold">הפקדה (₪)</label>
-                        <input type="number" id="input-monthly" value="2000" class="input-dark w-full">
-                        
-                        <label class="text-xs text-slate-500 uppercase font-bold text-emerald-400">תשואה (%)</label>
-                        <input type="number" id="input-yield" value="7" class="input-dark w-full">
-                        
-                        <label class="text-xs text-slate-500 uppercase font-bold text-cyan-400">שנים</label>
-                        <input type="number" id="input-years" value="20" class="input-dark w-full">
+            <div class="card p-6">
+                <h3 class="title italic">התפלגות נכסים</h3>
+                <canvas id="pieChart"></canvas>
+                <div id="asset-selectors" class="mt-4 space-y-2 text-xs border-t border-gray-800 pt-4">
+                    <p class="text-slate-500 mb-2">בחר נכסים לסימולטור:</p>
                     </div>
-                    <div class="md:col-span-2 bg-[#0B0F19] rounded-3xl p-8 border border-gray-800 flex flex-col justify-center text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-widest">הון משוער לסוף תקופה</p>
-                        <p id="compound-result" class="text-5xl font-black text-white mt-2 tracking-tighter">₪0</p>
-                        <canvas id="growthChart" class="mt-4 h-32"></canvas>
+            </div>
+            <div class="lg:col-span-2 card p-6">
+                <h3 class="title italic">סימולטור צמיחה מורכב</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="bg-[#0B0F19] p-4 rounded-2xl border border-gray-800">
+                            <label class="text-[10px] text-slate-500 uppercase block mb-1">הפקדה חודשית לכל הנבחרים</label>
+                            <input type="number" id="sim-monthly" value="2000" class="bg-transparent text-xl font-bold w-full outline-none text-cyan-400" oninput="updateDashboard()">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-[#0B0F19] p-4 rounded-2xl border border-gray-800">
+                                <label class="text-[10px] text-slate-500 uppercase block mb-1">תשואה שנתית %</label>
+                                <input type="number" id="sim-yield" value="7" class="bg-transparent text-xl font-bold w-full outline-none text-emerald-400" oninput="updateDashboard()">
+                            </div>
+                            <div class="bg-[#0B0F19] p-4 rounded-2xl border border-gray-800">
+                                <label class="text-[10px] text-slate-500 uppercase block mb-1">תקופה (שנים)</label>
+                                <input type="number" id="sim-years" value="20" class="bg-transparent text-xl font-bold w-full outline-none" oninput="updateDashboard()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center flex flex-col justify-center">
+                        <p id="sim-result" class="text-4xl font-black text-white tracking-tighter">₪0</p>
+                        <p class="text-xs text-slate-500 mt-2">סה"כ הון נזיל + קופות לסוף תקופה</p>
+                        <canvas id="growthChart" class="mt-4 h-24"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <section class="grid gap-6">
-            <div class="card p-8 overflow-x-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="title m-0 italic">פורטפוליו נכסים</h3>
-                    <button onclick="addItem('asset')" class="btn-add">+ נכס חדש</button>
-                </div>
-                <table class="w-full text-right" id="table-assets">
-                    <thead class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
-                        <tr><th class="pb-4">נכס</th><th class="pb-4">גוף</th><th class="pb-4">יתרה</th><th class="pb-4">דמי ניהול</th><th class="pb-4 text-center">פעולות</th></tr>
-                    </thead>
-                    <tbody id="asset-body"></tbody>
-                </table>
+        <div class="card p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="title italic">מעקב תזרים מזומנים (חודשי)</h3>
+                <button onclick="addMonth()" class="btn-add">חודש חדש +</button>
             </div>
+            <div class="grid lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-1 space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
+                    <div id="budget-list" class="space-y-3"></div>
+                </div>
+                <div class="lg:col-span-3 bg-[#0B0F19] rounded-2xl p-4 border border-gray-800 h-[350px]">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+        </div>
 
-            <div class="card p-8 overflow-x-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="title m-0 italic">ניהול תיק ביטוח</h3>
-                    <button onclick="addItem('insurance')" class="btn-add">+ פוליסה חדשה</button>
+        <div class="grid lg:grid-cols-2 gap-6">
+            <div class="card p-6 overflow-hidden">
+                <div class="flex justify-between items-center mb-6 text-sm">
+                    <h3 class="font-bold">ניהול נכסים ודמי ניהול</h3>
+                    <button onclick="addItem('asset')" class="text-cyan-400 text-xs hover:underline">+ הוסף נכס</button>
                 </div>
-                <table class="w-full text-right" id="table-insurance">
-                    <thead class="text-slate-500 text-[10px] uppercase border-b border-gray-800">
-                        <tr><th class="pb-4">סוג</th><th class="pb-4">חברה</th><th class="pb-4">עלות</th><th class="pb-4">ממוצע שוק</th><th class="pb-4 text-center">סטטוס</th><th class="pb-4 text-center">פעולות</th></tr>
-                    </thead>
-                    <tbody id="insurance-body"></tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead class="text-slate-500 uppercase border-b border-gray-800">
+                            <tr><th class="pb-3">נכס</th><th class="pb-3">יתרה</th><th class="pb-3">ד.ניהול %</th><th class="pb-3">הערות</th><th class="pb-3"></th></tr>
+                        </thead>
+                        <tbody id="asset-body" class="divide-y divide-gray-800/40"></tbody>
+                    </table>
+                </div>
             </div>
-        </section>
+            <div class="card p-6 overflow-hidden">
+                <div class="flex justify-between items-center mb-6 text-sm">
+                    <h3 class="font-bold">תיק ביטוחים והשוואה</h3>
+                    <button onclick="addItem('insurance')" class="text-orange-400 text-xs hover:underline">+ הוסף פוליסה</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-xs">
+                        <thead class="text-slate-500 uppercase border-b border-gray-800">
+                            <tr><th class="pb-3">סוג</th><th class="pb-3">עלות</th><th class="pb-3">ממוצע</th><th class="pb-3">סטטוס</th><th class="pb-3"></th></tr>
+                        </thead>
+                        <tbody id="insurance-body" class="divide-y divide-gray-800/40"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
