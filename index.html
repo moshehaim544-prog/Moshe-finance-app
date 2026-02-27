@@ -3,124 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Master Pro | Moshe Haim</title>
+    <title>WealthGuard | משה חיים</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50">
+<body class="bg-[#f8fafc]">
 
-    <div class="app-container">
-        <header class="header-card">
-            <div class="flex justify-between items-center mb-6">
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-6xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
+                    <i data-lucide="landmark" class="text-white w-6 h-6"></i>
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">WealthGuard</h1>
+            </div>
+            <div class="hidden sm:block text-slate-500 text-sm font-medium">ניהול הון וביטוח | גיל 28</div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-6xl space-y-8">
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card p-6 rounded-2xl border border-white shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="trending-up"></i></div>
                 <div>
-                    <h1 class="text-2xl font-bold">Finance Master</h1>
-                    <p class="text-slate-300 text-xs">ניהול פיננסי חכם</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportToExcel()" class="p-2 bg-green-600/20 hover:bg-green-600/40 rounded-lg text-[10px] transition">Excel</button>
-                    <button onclick="exportToPDF()" class="p-2 bg-red-600/20 hover:bg-red-600/40 rounded-lg text-[10px] transition">PDF</button>
+                    <p class="text-xs text-slate-500">סה"כ נכסים</p>
+                    <p id="kpi-assets" class="text-xl font-bold text-slate-900 font-mono">₪0</p>
                 </div>
             </div>
-            
-            <div class="bg-white/10 p-5 rounded-2xl backdrop-blur-md border border-white/10">
-                <p class="text-slate-300 text-xs mb-1">שווי נקי כולל (נכסים)</p>
-                <h2 id="net-worth-display" class="text-3xl font-bold tracking-tighter">₪ 0</h2>
+            <div class="glass-card p-6 rounded-2xl border border-white shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-orange-50 rounded-lg text-orange-600"><i data-lucide="shield"></i></div>
+                <div>
+                    <p class="text-xs text-slate-500">ביטוח חודשי</p>
+                    <p id="kpi-insurance" class="text-xl font-bold text-slate-900 font-mono">₪0</p>
+                </div>
             </div>
-        </header>
-
-        <nav class="tabs-nav">
-            <div onclick="switchTab('assets', this)" class="tab-link active">נכסים</div>
-            <div onclick="switchTab('budget', this)" class="tab-link">תקציב</div>
-            <div onclick="switchTab('simulator', this)" class="tab-link">סימולטור</div>
-        </nav>
-
-        <main class="flex-grow pb-24">
-            
-            <section id="tab-assets" class="tab-content active">
-                <div class="chart-container">
-                    <canvas id="assetChart"></canvas>
+            <div class="glass-card p-6 rounded-2xl border border-white shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600"><i data-lucide="layers"></i></div>
+                <div>
+                    <p class="text-xs text-slate-500">נכסים פעילים</p>
+                    <p id="kpi-count" class="text-xl font-bold text-slate-900">0</p>
                 </div>
-                <div class="flex justify-between items-center mt-6 mb-4">
-                    <h3 class="font-bold text-slate-800">תיק נכסים ופנסיות</h3>
-                    <button onclick="addAsset()" class="btn-add"><i data-lucide="plus-circle" size="16"></i> הוסף</button>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border border-white shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="activity"></i></div>
+                <div>
+                    <p class="text-xs text-slate-500">ציון בריאות</p>
+                    <p class="text-xl font-bold text-emerald-600">88/100</p>
                 </div>
-                <div id="asset-list" class="space-y-3"></div>
-            </section>
+            </div>
+        </div>
 
-            <section id="tab-budget" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <select id="month-selector" onchange="loadBudgetMonth()" class="bg-slate-100 p-2 rounded-xl font-bold text-sm border-none outline-none"></select>
-                    <button onclick="addNewMonth()" class="text-xs font-bold text-blue-600">+ חודש חדש</button>
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1 glass-card p-6 rounded-3xl border border-white shadow-sm flex flex-col items-center">
+                <h3 class="font-bold mb-6 text-slate-800 self-start">התפלגות נכסים</h3>
+                <div class="w-full h-[250px] relative">
+                    <canvas id="mainChart"></canvas>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-green-50 p-4 rounded-2xl border border-green-100">
-                        <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider">הכנסות</p>
-                        <p id="total-income" class="text-xl font-bold text-green-700">₪ 0</p>
-                    </div>
-                    <div class="bg-red-50 p-4 rounded-2xl border border-red-100">
-                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider">הוצאות</p>
-                        <p id="total-expense" class="text-xl font-bold text-red-700">₪ 0</p>
-                    </div>
+            <div class="lg:col-span-2 glass-card p-6 rounded-3xl border border-white shadow-sm overflow-hidden">
+                <h3 class="font-bold mb-4 text-slate-800 text-lg">פוליסות ביטוח פעילות</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-slate-50/50 text-slate-500">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold">סוג ביטוח</th>
+                                <th class="px-4 py-3 font-semibold">חברה</th>
+                                <th class="px-4 py-3 font-semibold">פרמיה</th>
+                                <th class="px-4 py-3 font-semibold">סטטוס</th>
+                            </tr>
+                        </thead>
+                        <tbody id="policy-table" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
 
-                <div class="space-y-6">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-bold text-green-700 flex items-center gap-1"><i data-lucide="arrow-down-left" size="14"></i> הכנסות</h4>
-                            <button onclick="addBudgetItem('income')" class="text-xs font-bold text-green-600">+ הוסף</button>
-                        </div>
-                        <div id="income-list" class="space-y-2"></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-bold text-red-700 flex items-center gap-1"><i data-lucide="arrow-up-right" size="14"></i> הוצאות</h4>
-                            <button onclick="addBudgetItem('expense')" class="text-xs font-bold text-red-600">+ הוסף</button>
-                        </div>
-                        <div id="expense-list" class="space-y-2"></div>
-                    </div>
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white shadow-sm">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">ניהול נכסים מפורט</h3>
+                    <p class="text-slate-500 text-sm">מעקב אחר צבירות וחסכונות</p>
                 </div>
-            </section>
-
-            <section id="tab-simulator" class="tab-content">
-                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
-                    <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="calculator" size="18"></i> תחזית עושר (ריבית דריבית)</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] opacity-60">הפקדה חודשית (₪)</label>
-                            <input id="sim-monthly" type="number" value="3000" class="bg-white/10 border-white/20 text-white p-3">
-                        </div>
-                        <div>
-                            <label class="text-[10px] opacity-60">תשואה שנתית מצופה (%)</label>
-                            <input id="sim-return" type="number" value="7" class="bg-white/10 border-white/20 text-white p-3">
-                        </div>
-                        <div>
-                            <label class="text-[10px] opacity-60">תקופה (שנים)</label>
-                            <input id="sim-years" type="number" value="15" class="bg-white/10 border-white/20 text-white p-3">
-                        </div>
-                        <button onclick="runSimulation()" class="w-full bg-blue-600 p-4 rounded-xl font-bold mt-2 shadow-lg shadow-blue-900/40">חשב תחזית נטו</button>
-                    </div>
-                </div>
-                <div id="sim-result" class="hidden animate-bounce-in bg-white p-6 rounded-2xl border-2 border-blue-500 text-center shadow-sm">
-                    <p class="text-xs text-slate-400 mb-1">צפי הון נזיל (אחרי 25% מס רווחי הון):</p>
-                    <h2 id="sim-total-value" class="text-3xl font-black text-slate-900 font-mono">₪ 0</h2>
-                </div>
-            </section>
-        </main>
-
-        <nav class="bottom-nav">
-            <div class="nav-item active"><i data-lucide="wallet"></i><span>פיננסי</span></div>
-            <div class="nav-item"><i data-lucide="baby"></i><span>אבהות</span></div>
-            <div class="nav-item"><i data-lucide="heart"></i><span>בריאות</span></div>
-            <div class="nav-item"><i data-lucide="settings"></i><span>הגדרות</span></div>
-        </nav>
-    </div>
+                <button onclick="addAsset()" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> הוסף נכס
+                </button>
+            </div>
+            <div id="asset-ledger" class="grid gap-4"></div>
+        </div>
+    </main>
 
     <script src="script.js"></script>
 </body>
